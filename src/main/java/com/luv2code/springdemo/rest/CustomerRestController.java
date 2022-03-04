@@ -23,15 +23,51 @@ public class CustomerRestController {
 	@Autowired
 	private CustomerService customerService;
 	
-	// add mapping for GET /customers
+	// index
 	@GetMapping("/customers")
 	public List<Customer> getCustomers() {
-		
 		return customerService.getCustomers();
-		
 	}
 	
+	//show
+	@GetMapping("/customers/{customerId}")
+	public Customer getCustomer(@PathVariable int customerId) {
+		Customer customer = customerService.getCustomer(customerId);
+		if(customer == null) {
+			throw new CustomerNotFoundException("Id not found.");
+		}
+		return customer;
+	}
 	
+	//create
+	@PostMapping("/customers")
+	public Customer addCustomer(@RequestBody Customer customer) {
+		//0 means "empty" for hibernate
+		//it will create a new id for the table
+		customer.setId(0);
+		customerService.saveCustomer(customer);
+		return customer;
+	}
+	
+	//update
+	@PutMapping("/customers")
+	public Customer updateCustomer(@RequestBody Customer customer) {
+		//our service uses .saveOrUpdate() with its
+		//.saveCustomer method
+		customerService.saveCustomer(customer);
+		return customer;
+	}
+	
+	//delete
+	@DeleteMapping("/customers/{customerId}")
+	public String deleteCustomer(@PathVariable int customerId) {
+		Customer customer = customerService.getCustomer(customerId);
+		if(customer == null) {
+			throw new CustomerNotFoundException("Id not found.");
+		}
+		customerService.deleteCustomer(customerId);
+		return "Deleted customer successfully.";
+	}
 	
 }
 
